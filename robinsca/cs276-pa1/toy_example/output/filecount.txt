@@ -1,1 +1,39 @@
+0/fine.txt i'm
+0/fine.txt fine
+0/fine.txt ,
+0/fine.txt thank
+0/fine.txt you
+0/hello.txt hi
+0/hello.txt hi
+0/hello.txt how
+0/hello.txt are
+0/hello.txt you
+0/hello.txt ?
+output/index/0
+2/fine.txt i'm
+2/fine.txt fine
+2/fine.txt ,
+2/fine.txt thank
+2/fine.txt you
+2/hello.txt hi
+2/hello.txt hi
+2/hello.txt how
+2/hello.txt are
+2/hello.txt you
+2/hello.txt ?
+output/index/2
+1/bye.txt good
+1/bye.txt to
+1/bye.txt see
+1/bye.txt you
+1/bye.txt ,
+1/bye.txt bye
+1/bye.txt see
+1/bye.txt you
+1/bye.txt later
+1/bye.txt ?
+1/byebye.txt bye
+1/byebye.txt bye
+1/byebye.txt bye
+output/index/1
 6

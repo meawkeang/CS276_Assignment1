@@ -26,4 +26,8 @@ public class PostingList {
 	public List<Integer> getList() {
 		return this.postings;
 	}
+
+	public String toString() {
+		return "termID: " + this.termId + " " + this.postings;
+	}
 }

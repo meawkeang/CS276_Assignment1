@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 
 public class Index {
@@ -64,8 +65,47 @@ public class Index {
 	}
 
 	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs){
-		Collections.sort(pairs);
+		//System.out.println("Unsorted all pairs");
 		//System.out.println(pairs);
+		Collections.sort(pairs);
+		//System.out.println("Sorted all pairs");
+		//System.out.println(pairs);
+		if(pairs.size() == 0) return;
+		//start and i are inclusive pointers
+		int start = 0;
+		for(int i = 0; i < pairs.size(); i++){
+			if(i+1 == pairs.size()){
+				//We're finished with the list
+				createPosting(pairs,start,i);
+				return;
+			}
+			Pair<Integer,Integer> current = pairs.get(i);
+			Pair<Integer,Integer> next = pairs.get(i+1);
+			if(!((Integer)current.getFirst()).equals((Integer)next.getFirst())){
+				//We dont have a match
+				createPosting(pairs,start,i);
+				start = i+1;
+			}
+		}
+	}
+
+	private static void createPosting(ArrayList<Pair<Integer,Integer>> pairs,int start,int end){
+		//System.out.println("Posting");
+		//System.out.println(pairs.subList(start,end+1));
+		List<Pair<Integer,Integer>> pairPostings = pairs.subList(start,end+1);
+		ArrayList<Integer> intPostings = new ArrayList<Integer>(pairPostings.size());
+		//docIDs are all non-negative
+		Integer prevDoc = new Integer(-1);
+		for(int i = 0; i < pairPostings.size(); i++){
+			Integer doc = (Integer)(pairPostings.get(i)).getSecond();
+			if(!doc.equals(prevDoc)){
+				intPostings.add(doc);
+			}
+			prevDoc = doc;
+		}
+		int termID = (Integer)(pairPostings.get(0)).getFirst();
+		PostingList pl = new PostingList(termID,intPostings);
+		//System.out.println(pl);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -121,8 +161,7 @@ public class Index {
 			File blockDir = new File(root, block.getName());
 			File[] filelist = blockDir.listFiles();
 			
-			int averageTermsPerBlock = 10000;
-			ArrayList<Pair<Integer,Integer>> pairs = new ArrayList<Pair<Integer,Integer>>(averageTermsPerBlock);
+			ArrayList<Pair<Integer,Integer>> pairs = new ArrayList<Pair<Integer,Integer>>();
 
 			/* For each file */
 			for (File file : filelist) {
@@ -184,7 +223,7 @@ public class Index {
 			 
 			/* My code here
 			 * This is where we merge all of the blocks with merge sort for
-			 * already sorted lists.
+			 * already sorted lists. We also track the freq of terms here
 			 */
 			
 			bf1.close();

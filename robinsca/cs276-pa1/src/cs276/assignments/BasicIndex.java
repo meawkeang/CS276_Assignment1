@@ -14,8 +14,6 @@ public class BasicIndex implements BaseIndex {
 
 	@Override
 	public void writePosting(FileChannel fc, PostingList p) {
-		/*
-		 * Your code here
-		 */
+		//System.out.println(p);
 	}
 }

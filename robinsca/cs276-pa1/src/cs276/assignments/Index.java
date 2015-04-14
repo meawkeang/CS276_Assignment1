@@ -65,7 +65,7 @@ public class Index {
 	}
 
 	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs,
-		FileChannel fc){
+		FileChannel fc, BaseIndex index){
 		//System.out.println("Unsorted all pairs");
 		//System.out.println(pairs);
 		Collections.sort(pairs);
@@ -77,21 +77,21 @@ public class Index {
 		for(int i = 0; i < pairs.size(); i++){
 			if(i+1 == pairs.size()){
 				//We're finished with the list
-				createPosting(pairs,start,i,fc);
+				createPosting(pairs,start,i,fc,index);
 				return;
 			}
 			Pair<Integer,Integer> current = pairs.get(i);
 			Pair<Integer,Integer> next = pairs.get(i+1);
 			if(!((Integer)current.getFirst()).equals((Integer)next.getFirst())){
 				//We dont have a match
-				createPosting(pairs,start,i,fc);
+				createPosting(pairs,start,i,fc,index);
 				start = i+1;
 			}
 		}
 	}
 
 	private static void createPosting(ArrayList<Pair<Integer,Integer>> pairs,
-		int start,int end,FileChannel fc){
+		int start,int end,FileChannel fc,BaseIndex index){
 		//System.out.println("Posting");
 		//System.out.println(pairs.subList(start,end+1));
 		List<Pair<Integer,Integer>> pairPostings = pairs.subList(start,end+1);
@@ -107,8 +107,8 @@ public class Index {
 		}
 		int termID = (Integer)(pairPostings.get(0)).getFirst();
 		PostingList pl = new PostingList(termID,intPostings);
-		pl.writeToFile(fc);
 		//System.out.println(pl);
+		index.writePosting(fc,pl);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -200,7 +200,7 @@ public class Index {
 			 * and block index and write the index to file. The method will call
 			 * writePosting above for sure.
 			 */
-			reducer(pairs,fc);
+			reducer(pairs,fc,index);
 			bfc.close();
 		}
 

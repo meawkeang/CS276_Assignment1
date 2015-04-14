@@ -116,9 +116,11 @@ public class Index {
 				while ((line = reader.readLine()) != null) {
 					String[] tokens = line.trim().split("\\s+");
 					for (String token : tokens) {
-						/*
-						 * Your code here
+						/* My code here
+						 * This is where we create the create the termID docID pairs
+						 * for a block. We also create the term dictionary.
 						 */
+						System.out.println(fileName + " " + token);
 					}
 				}
 				reader.close();
@@ -131,11 +133,11 @@ public class Index {
 			}
 			
 			RandomAccessFile bfc = new RandomAccessFile(blockFile, "rw");
-			
-			/*
-			 * Your code here
+			/* My code here.
+			 * This is where we sort the termID docID pairs, create the postings
+			 * and block index and write the index to file. The method will call
+			 * writePosting above for sure.
 			 */
-			
 			bfc.close();
 		}
 
@@ -160,8 +162,9 @@ public class Index {
 			RandomAccessFile bf2 = new RandomAccessFile(b2, "r");
 			RandomAccessFile mf = new RandomAccessFile(combfile, "rw");
 			 
-			/*
-			 * Your code here
+			/* My code here
+			 * This is where we merge all of the blocks with merge sort for
+			 * already sorted lists.
 			 */
 			
 			bf1.close();

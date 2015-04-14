@@ -1,5 +1,6 @@
 package cs276.assignments;
 
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,5 +30,9 @@ public class PostingList {
 
 	public String toString() {
 		return "termID: " + this.termId + " " + this.postings;
+	}
+
+	public void writeToFile(FileChannel fc){
+
 	}
 }

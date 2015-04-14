@@ -64,7 +64,8 @@ public class Index {
 		pairs.add(pair);
 	}
 
-	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs){
+	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs,
+		FileChannel fc){
 		//System.out.println("Unsorted all pairs");
 		//System.out.println(pairs);
 		Collections.sort(pairs);
@@ -76,20 +77,21 @@ public class Index {
 		for(int i = 0; i < pairs.size(); i++){
 			if(i+1 == pairs.size()){
 				//We're finished with the list
-				createPosting(pairs,start,i);
+				createPosting(pairs,start,i,fc);
 				return;
 			}
 			Pair<Integer,Integer> current = pairs.get(i);
 			Pair<Integer,Integer> next = pairs.get(i+1);
 			if(!((Integer)current.getFirst()).equals((Integer)next.getFirst())){
 				//We dont have a match
-				createPosting(pairs,start,i);
+				createPosting(pairs,start,i,fc);
 				start = i+1;
 			}
 		}
 	}
 
-	private static void createPosting(ArrayList<Pair<Integer,Integer>> pairs,int start,int end){
+	private static void createPosting(ArrayList<Pair<Integer,Integer>> pairs,
+		int start,int end,FileChannel fc){
 		//System.out.println("Posting");
 		//System.out.println(pairs.subList(start,end+1));
 		List<Pair<Integer,Integer>> pairPostings = pairs.subList(start,end+1);
@@ -105,6 +107,7 @@ public class Index {
 		}
 		int termID = (Integer)(pairPostings.get(0)).getFirst();
 		PostingList pl = new PostingList(termID,intPostings);
+		pl.writeToFile(fc);
 		//System.out.println(pl);
 	}
 
@@ -191,12 +194,13 @@ public class Index {
 			}
 			
 			RandomAccessFile bfc = new RandomAccessFile(blockFile, "rw");
+			FileChannel fc = bfc.getChannel();
 			/* My code here.
 			 * This is where we sort the termID docID pairs, create the postings
 			 * and block index and write the index to file. The method will call
 			 * writePosting above for sure.
 			 */
-			reducer(pairs);
+			reducer(pairs,fc);
 			bfc.close();
 		}
 

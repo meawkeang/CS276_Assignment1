@@ -1,0 +1,18 @@
+README
+
+run_dev.sh takes one argument specifing which task you want to run with.
+For example, if you want to test your task 2 program with dev set, you should invoke
+
+sh run_dev.sh task2/
+
+The script will output the number of different lines with respect to the correct
+solution. A correct implementation should output 0's.
+
+
+submit.py would guide you submitting the tasks of this assignemnt. Follow the guidance to submit your task 1-3 and optionally task 4.
+
+python submit.py
+
+formatVerification.py make sure that your output format is incorrect format. If you pass the toy_example/grader.sh, you have no need to run this script. If you got incorrect answer from running toy_example/grader.sh, make sure you pass this format verifier.
+
+python formatVerification.py

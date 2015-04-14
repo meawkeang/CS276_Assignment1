@@ -13,6 +13,8 @@ import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Index {
 
@@ -50,6 +52,20 @@ public class Index {
 		/*
 		 * Your code here
 		 */
+	}
+
+	private static void mapper(ArrayList<Pair<Integer,Integer>> pairs, String term, int docID){
+		if(!termDict.containsKey(term)){
+			wordIdCounter = wordIdCounter + 1;
+			termDict.put(term,new Integer(wordIdCounter));
+		}
+		Pair<Integer,Integer> pair = new Pair<Integer,Integer>(termDict.get(term),new Integer(docID));
+		pairs.add(pair);
+	}
+
+	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs){
+		Collections.sort(pairs);
+		System.out.println(pairs);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -105,6 +121,9 @@ public class Index {
 			File blockDir = new File(root, block.getName());
 			File[] filelist = blockDir.listFiles();
 			
+			int averageTermsPerBlock = 10000;
+			ArrayList<Pair<Integer,Integer>> pairs = new ArrayList<Pair<Integer,Integer>>(averageTermsPerBlock);
+
 			/* For each file */
 			for (File file : filelist) {
 				++totalFileCount;
@@ -120,7 +139,7 @@ public class Index {
 						 * This is where we create the create the termID docID pairs
 						 * for a block. We also create the term dictionary.
 						 */
-						System.out.println(fileName + " " + token);
+						mapper(pairs,token,docIdCounter);
 					}
 				}
 				reader.close();
@@ -138,6 +157,7 @@ public class Index {
 			 * and block index and write the index to file. The method will call
 			 * writePosting above for sure.
 			 */
+			reducer(pairs);
 			bfc.close();
 		}
 

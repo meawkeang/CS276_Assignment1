@@ -65,7 +65,7 @@ public class Index {
 
 	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs){
 		Collections.sort(pairs);
-		System.out.println(pairs);
+		//System.out.println(pairs);
 	}
 
 	public static void main(String[] args) throws IOException {

@@ -8,7 +8,7 @@ import java.util.*;
  * 
  * @author Dan Klein
  */
-public class Pair<F, S> implements Comparator<Pair<F, S>>, Comparable<Pair<F, S>>{
+public class Pair<F, S> implements Comparator<Pair<Integer, Integer>>, Comparable<Pair<Integer, Integer>>{
 	private F first;
 	private S second;
 
@@ -65,13 +65,9 @@ public class Pair<F, S> implements Comparator<Pair<F, S>>, Comparable<Pair<F, S>
 		return new Pair<E, F>(car, cdr);
 	}
 
+	// For my purposes I only care about sorting for Integers
 	// Overriding the compareTo method
-	// Assumes F and S are both Integers
-	public int compareTo(Pair<F,S> pr){
-		if(!(pr.getFirst() instanceof Integer) || !(pr.getSecond() instanceof Integer)
-			|| !(this.getFirst() instanceof Integer) || !(this.getSecond() instanceof Integer)){
-			return 0;
-		}
+	public int compareTo(Pair<Integer, Integer> pr){
 		if(((Integer)this.getFirst()).compareTo(((Integer)pr.getFirst())) != 0){
 			return ((Integer)this.getFirst()).compareTo(((Integer)pr.getFirst()));
 		}else{
@@ -80,12 +76,7 @@ public class Pair<F, S> implements Comparator<Pair<F, S>>, Comparable<Pair<F, S>
 	}
 
 	// Overriding the compare method
-	// Assumes F and S are both Integers
-	public int compare(Pair<F,S> pr1, Pair<F,S> pr2){
-		if(!(pr1.getFirst() instanceof Integer) || !(pr1.getSecond() instanceof Integer)
-			|| !(pr2.getFirst() instanceof Integer) || !(pr2.getSecond() instanceof Integer)){
-			return 0;
-		}
+	public int compare(Pair<Integer, Integer> pr1, Pair<Integer, Integer> pr2){
 		if((Integer)pr1.getFirst() - (Integer)pr2.getFirst() != 0){
 			return (Integer)pr1.getFirst() - (Integer)pr2.getFirst();
 		}else{

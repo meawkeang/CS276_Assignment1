@@ -12,21 +12,19 @@ public class BasicIndex implements BaseIndex {
 	public PostingList readPosting(FileChannel fc) {
 		try{
 			if(fc.position() >= fc.size()) return null;
-			ByteBuffer termBuf = ByteBuffer.allocate(4);
-			ByteBuffer numPostingsBuf = ByteBuffer.allocate(4);
-			fc.read(termBuf);
-			fc.read(numPostingsBuf);
-			int termID = termBuf.getInt(0);
-			int numPostings = numPostingsBuf.getInt(0);
+			ByteBuffer creds = ByteBuffer.allocate(2*4);
+			fc.read(creds);
+			int termID = creds.getInt(0);
+			int numPostings = creds.getInt(4);
 			ArrayList<Integer> postings = new ArrayList<Integer>(numPostings);
+			ByteBuffer docs = ByteBuffer.allocate(numPostings*4);
+			fc.read(docs);
 			for(int i = 0; i < numPostings; i++){
-				ByteBuffer docID = ByteBuffer.allocate(4);
-				fc.read(docID);
-				postings.add(new Integer(docID.getInt(0)));
+				postings.add(new Integer(docs.getInt(i*4)));
 			}
 			PostingList pl = new PostingList(termID,postings);
 			return pl;
-		}catch(/*IO*/Exception e){
+		}catch(IOException e){
 			e.printStackTrace();
 		}
 		return null;
@@ -39,11 +37,15 @@ public class BasicIndex implements BaseIndex {
 		List<Integer> postings = p.getList();
 		int numPostings = postings.size();
 		try{
-			fc.write(ByteBuffer.wrap(ByteBuffer.allocate(4).putInt(termID).array()));
-			fc.write(ByteBuffer.wrap(ByteBuffer.allocate(4).putInt(numPostings).array()));
+			ByteBuffer creds = ByteBuffer.allocate(2*4);
+			creds.putInt(termID);
+			creds.putInt(numPostings);
+			fc.write(ByteBuffer.wrap(creds.array()));
+			ByteBuffer bf = ByteBuffer.allocate(numPostings*4);
 			for(int i = 0; i < numPostings; i++){
-				fc.write(ByteBuffer.wrap(ByteBuffer.allocate(4).putInt(postings.get(i)).array()));
+				bf.putInt(postings.get(i));
 			}
+			fc.write(ByteBuffer.wrap(bf.array()));
 		}catch(IOException e){
 			e.printStackTrace();
 		}

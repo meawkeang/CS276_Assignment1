@@ -31,10 +31,16 @@ public class Query {
 	 * */
 	private static PostingList readPosting(FileChannel fc, int termId)
 			throws IOException {
-		/*
-		 * Your code here
-		 */
-		return null;
+		if(!posDict.containsKey(termId)){
+			//return new PostingList(termId);
+			return null;
+		}
+		long pos = posDict.get(termId);
+		return index.readPosting(fc.position(pos));
+	}
+
+	private static void answer(String query, FileChannel fc){
+		
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -102,9 +108,7 @@ public class Query {
 
 		/* For each query */
 		while ((line = br.readLine()) != null) {
-			/*
-			 * Your code here
-			 */
+			answer(line,indexFile.getChannel());
 		}
 		br.close();
 		indexFile.close();

@@ -38,12 +38,14 @@ public class BasicIndex implements BaseIndex {
 		int numPostings = postings.size();
 		try{
 			ByteBuffer bf = ByteBuffer.allocate(2*4 + numPostings*4);
+			bf.clear();
 			bf.putInt(termID);
 			bf.putInt(numPostings);
 			for(int i = 0; i < numPostings; i++){
 				bf.putInt(postings.get(i));
 			}
-			fc.write(ByteBuffer.wrap(bf.array()));
+			bf.flip();
+			fc.write(bf);
 		}catch(IOException e){
 			e.printStackTrace();
 		}

@@ -229,7 +229,8 @@ public class Index {
 			for (File file : filelist) {
 				++totalFileCount;
 				String fileName = block.getName() + "/" + file.getName();
-				docDict.put(fileName, docIdCounter++);
+				docIdCounter = docIdCounter + 1;
+				docDict.put(fileName, docIdCounter);
 				
 				BufferedReader reader = new BufferedReader(new FileReader(file));
 				String line;

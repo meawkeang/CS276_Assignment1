@@ -1,5 +1,6 @@
 package cs276.assignments;
 
+import java.util.Collections;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,6 +10,9 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.List;
+import cs276.util.Freq;
 
 public class Query {
 
@@ -31,16 +35,61 @@ public class Query {
 	 * */
 	private static PostingList readPosting(FileChannel fc, int termId)
 			throws IOException {
-		if(!posDict.containsKey(termId)){
-			//return new PostingList(termId);
-			return null;
-		}
 		long pos = posDict.get(termId);
-		return index.readPosting(fc.position(pos));
+		PostingList pl = index.readPosting(fc.position(pos));
+		//System.out.println(pl);
+		return pl;
 	}
 
-	private static void answer(String query, FileChannel fc){
-		
+	private static void answer(String query, FileChannel fc) throws IOException {
+		String[] tokens = query.trim().split("\\s+");
+		ArrayList<Freq> ar = new ArrayList<Freq>(tokens.length);
+		for(int i = 0; i < tokens.length; i++){
+			if(!termDict.containsKey(tokens[i])){
+				//Posting list of 0, automatically no returned docs
+				System.out.println("no results found");
+				return;
+			}
+			int termID = termDict.get(tokens[i]);
+			int freq = freqDict.get(termID);
+			ar.add(new Freq(new Integer(termID),new Integer(freq)));
+		}
+		Collections.sort(ar);
+		//System.out.println(ar);
+		processQuery(ar,fc);
+	}
+
+	private static void processQuery(ArrayList<Freq> ar, FileChannel fc) throws IOException {
+		List<Integer> docList = readPosting(fc,(ar.get(0)).getTermId()).getList();
+		for(int i = 1; i < ar.size(); i++){
+			List<Integer> nextList = readPosting(fc,(ar.get(i)).getTermId()).getList();
+			docList = intersectList(docList, nextList);
+		}
+		printDocList(docList);
+	}
+
+	private static List<Integer> intersectList(List<Integer> shorterList,
+		List<Integer> longerList){
+		/*ArrayList<Integer> finalList = new ArrayList<Integer>(shorterList.size());
+		finalList.add(new Integer(1));
+		return finalList;*/
+		return new ArrayList<Integer>(shorterList);
+	}
+
+	private static void printDocList(List<Integer> docList){
+		if(docList.size() == 0){
+			System.out.println("no results found");
+			return;
+		}
+		ArrayList<String> list = new ArrayList<String>(docList.size());
+		for(int i = 0; i < docList.size(); i++){
+			list.add(docDict.get(docList.get(i)));
+		}
+		//System.out.println(list);
+		Collections.sort(list);
+		for(int i = 0; i < list.size(); i++){
+			System.out.println(list.get(i));
+		}
 	}
 
 	public static void main(String[] args) throws IOException {

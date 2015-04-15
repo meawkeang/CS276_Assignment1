@@ -46,10 +46,9 @@ public class Index {
 		RandomAccessFile mf = new RandomAccessFile(indexFile, "r");
 		FileChannel fc = mf.getChannel();
 		PostingList pl = index.readPosting(fc);
-		System.out.println(pl);
 		while(pl != null){
+			//System.out.println(pl);
 			pl = index.readPosting(fc);
-			System.out.println(pl);
 		}
 	}
 	
@@ -76,10 +75,11 @@ public class Index {
 		PostingList left = index.readPosting(fc1);
 		PostingList right = index.readPosting(fc2);
 		while(true){
+			//Both null, both lists are exhausted.
 			if(left == null && right == null){
-				//Both lists are finished, return
 				return;
 			}
+			//Take the shorter termID, if equal then combine
 			if(left != null && right != null){
 				if(left.getTermId() == right.getTermId()){
 					//Equal terms, combine and advance both
@@ -98,12 +98,11 @@ public class Index {
 					}
 				}
 			}else{
-				if(left == null){
-					//Left is null, advance the other posting
+				//One of these postings is null, advance the nonnull pointer,
+				if(right != null){
 					writePosting(comb,right);
 					right = index.readPosting(fc2);
 				}else{
-					//Right is null. advance the other posting
 					writePosting(comb,left);
 					left = index.readPosting(fc1);
 				}
@@ -120,6 +119,7 @@ public class Index {
 		}
 		Pair<Integer,Integer> pair = new Pair<Integer,Integer>(termDict.get(term),new Integer(docID));
 		pairs.add(pair);
+		//System.out.println(pair);
 	}
 
 	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs,

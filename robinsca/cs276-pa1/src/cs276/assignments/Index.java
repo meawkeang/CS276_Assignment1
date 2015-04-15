@@ -41,6 +41,17 @@ public class Index {
 	// Index
 	private static BaseIndex index = null;
 
+
+	private static void sanityCheck(File indexFile) throws IOException {
+		RandomAccessFile mf = new RandomAccessFile(indexFile, "r");
+		FileChannel fc = mf.getChannel();
+		PostingList pl = index.readPosting(fc);
+		System.out.println(pl);
+		while(pl != null){
+			pl = index.readPosting(fc);
+			System.out.println(pl);
+		}
+	}
 	
 	/* 
 	 * Write a posting list to the file 
@@ -286,6 +297,7 @@ public class Index {
 
 		/* Dump constructed index back into file system */
 		File indexFile = blockQueue.removeFirst();
+		sanityCheck(indexFile);
 		indexFile.renameTo(new File(output, "corpus.index"));
 
 		BufferedWriter termWriter = new BufferedWriter(new FileWriter(new File(

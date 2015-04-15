@@ -194,12 +194,12 @@ public class Index {
 			}
 			
 			RandomAccessFile bfc = new RandomAccessFile(blockFile, "rw");
-			FileChannel fc = bfc.getChannel();
 			/* My code here.
 			 * This is where we sort the termID docID pairs, create the postings
 			 * and block index and write the index to file. The method will call
 			 * writePosting above for sure.
 			 */
+			FileChannel fc = bfc.getChannel();
 			reducer(pairs,fc,index);
 			bfc.close();
 		}

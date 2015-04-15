@@ -10,9 +10,6 @@ public class BasicIndex implements BaseIndex {
 
 	@Override
 	public PostingList readPosting(FileChannel fc) {
-		/*
-		 * Your code here
-		 */
 		return null;
 	}
 
@@ -23,10 +20,10 @@ public class BasicIndex implements BaseIndex {
 		List<Integer> postings = p.getList();
 		int numPostings = postings.size();
 		try{
-			fc.write(ByteBuffer.allocate(4).putInt(termID));
-			fc.write(ByteBuffer.allocate(4).putInt(numPostings));
+			fc.write(ByteBuffer.wrap(ByteBuffer.allocate(4).putInt(termID).array()));
+			fc.write(ByteBuffer.wrap(ByteBuffer.allocate(4).putInt(numPostings).array()));
 			for(int i = 0; i < numPostings; i++){
-				fc.write(ByteBuffer.allocate(4).putInt(postings.get(i)));
+				fc.write(ByteBuffer.wrap(ByteBuffer.allocate(4).putInt(postings.get(i)).array()));
 			}
 		}catch(IOException e){
 			e.printStackTrace();

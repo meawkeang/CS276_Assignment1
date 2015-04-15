@@ -66,7 +66,12 @@ public class PostingList {
 				}
 			}
 		}
+		System.out.println("Came in as");
+		System.out.println(left);
+		System.out.println(right);
+		System.out.println("Leaving as");
 		PostingList pl = new PostingList(termID,postings);
+		System.out.println(pl);
 		return pl;
 	}
 }

@@ -43,11 +43,12 @@ public class Index {
 
 
 	private static void sanityCheck(File indexFile) throws IOException {
+		System.out.println("SanityCheck...");
 		RandomAccessFile mf = new RandomAccessFile(indexFile, "r");
 		FileChannel fc = mf.getChannel();
 		PostingList pl = index.readPosting(fc);
 		while(pl != null){
-			//System.out.println(pl);
+			System.out.println(pl);
 			pl = index.readPosting(fc);
 		}
 	}
@@ -297,7 +298,7 @@ public class Index {
 
 		/* Dump constructed index back into file system */
 		File indexFile = blockQueue.removeFirst();
-		sanityCheck(indexFile);
+		//sanityCheck(indexFile);
 		indexFile.renameTo(new File(output, "corpus.index"));
 
 		BufferedWriter termWriter = new BufferedWriter(new FileWriter(new File(

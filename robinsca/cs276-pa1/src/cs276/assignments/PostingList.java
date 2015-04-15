@@ -33,45 +33,52 @@ public class PostingList {
 
 	//This is a list for combined two postings lists with the same terms
 	public static PostingList combineLists(PostingList left, PostingList right){
+		//Setup
 		Integer termID = left.getTermId();
 		List<Integer> leftAr = left.getList();
 		List<Integer> rightAr = right.getList();
 		int leftSize = leftAr.size();
 		int rightSize = rightAr.size();
+		//Each docID is unique, this is indeed the final size
 		int combinedSize = leftSize + rightSize;
-		ArrayList<Integer> postings = new ArrayList<Integer>(combinedSize);
+		ArrayList<Integer> finalPostings = new ArrayList<Integer>(combinedSize);
 		int leftPtr = 0;
 		int rightPtr = 0;
-		int leftDoc = -1;
-		int rightDoc = -1;
+		//Loop
 		for(int i = 0; i < combinedSize; i++){
-			if(leftPtr < leftSize){
-				leftDoc = leftAr.get(leftPtr);
+			if(leftPtr >= leftSize){
+				finish(finalPostings,rightPtr,rightAr);
+				break;
 			}
-			if(rightPtr < rightSize){
-				rightDoc = rightAr.get(rightPtr);
+			if(rightPtr >= rightSize){
+				finish(finalPostings,leftPtr,leftAr);
+				break;
 			}
+			int leftDoc =  leftAr.get(leftPtr);
+			int rightDoc = rightAr.get(rightPtr);
 			if(leftDoc < rightDoc){
-				postings.add(new Integer(leftDoc));
+				finalPostings.add(new Integer(leftDoc));
 				leftPtr = leftPtr + 1;
-				if(leftPtr >= leftSize){
-					leftDoc = Integer.MAX_VALUE;
-				}
-			}
-			if(rightDoc > leftDoc){
-				postings.add(new Integer(rightDoc));
+			}else{
+				finalPostings.add(new Integer(rightDoc));
 				rightPtr = rightPtr + 1;
-				if(rightPtr >= rightSize){
-					rightDoc = Integer.MAX_VALUE;
-				}
 			}
 		}
-		System.out.println("Came in as");
-		System.out.println(left);
-		System.out.println(right);
-		System.out.println("Leaving as");
-		PostingList pl = new PostingList(termID,postings);
-		System.out.println(pl);
+		//Finished product
+		//System.out.println("Came in as");
+		//System.out.println(left);
+		//System.out.println(right);
+		//System.out.println("Leaving as");
+		PostingList pl = new PostingList(termID,finalPostings);
+		//System.out.println(pl);
 		return pl;
 	}
+
+	private static void finish(ArrayList<Integer> postings, int index, List<Integer> ar){
+		int length = ar.size();
+		for(int i = index; i < length; i++){
+			postings.add(ar.get(i));
+		}
+	}
+
 }

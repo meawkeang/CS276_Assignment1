@@ -1,3 +1,4 @@
+#!/bin/bash
 ./run.sh data output dev_queries $1/index.sh $1/query.sh
 for ((i = 1 ; i < 9 ; i++))
 do

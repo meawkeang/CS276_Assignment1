@@ -130,11 +130,12 @@ public class Index {
 		Collections.sort(pairs);
 		//System.out.println("Sorted all pairs");
 		//System.out.println(pairs);
-		if(pairs.size() == 0) return;
+		int pairArSize = pairs.size();
+		if(pairArSize == 0) return;
 		//start and i are inclusive pointers
 		int start = 0;
-		for(int i = 0; i < pairs.size(); i++){
-			if(i+1 == pairs.size()){
+		for(int i = 0; i < pairArSize; i++){
+			if(i+1 == pairArSize){
 				//We're finished with the list
 				createPosting(pairs,start,i,fc);
 				return;
@@ -223,7 +224,10 @@ public class Index {
 			File blockDir = new File(root, block.getName());
 			File[] filelist = blockDir.listFiles();
 			
-			ArrayList<Pair<Integer,Integer>> pairs = new ArrayList<Pair<Integer,Integer>>();
+			int avgTokensPerDoc = 200;
+			int avgDocsPerBlock = 10000;
+			int avgPairs = avgTokensPerDoc*avgDocsPerBlock;
+			ArrayList<Pair<Integer,Integer>> pairs = new ArrayList<Pair<Integer,Integer>>(avgPairs);
 
 			/* For each file */
 			for (File file : filelist) {

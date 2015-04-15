@@ -31,7 +31,42 @@ public class PostingList {
 		return "termID: " + this.termId + " " + this.postings;
 	}
 
+	//This is a list for combined two postings lists with the same terms
 	public static PostingList combineLists(PostingList left, PostingList right){
-		return left;
+		Integer termID = left.getTermId();
+		List<Integer> leftAr = left.getList();
+		List<Integer> rightAr = right.getList();
+		int leftSize = leftAr.size();
+		int rightSize = rightAr.size();
+		int combinedSize = leftSize + rightSize;
+		ArrayList<Integer> postings = new ArrayList<Integer>(combinedSize);
+		int leftPtr = 0;
+		int rightPtr = 0;
+		int leftDoc = -1;
+		int rightDoc = -1;
+		for(int i = 0; i < combinedSize; i++){
+			if(leftPtr < leftSize){
+				leftDoc = leftAr.get(leftPtr);
+			}
+			if(rightPtr < rightSize){
+				rightDoc = rightAr.get(rightPtr);
+			}
+			if(leftDoc < rightDoc){
+				postings.add(new Integer(leftDoc));
+				leftPtr = leftPtr + 1;
+				if(leftPtr >= leftSize){
+					leftDoc = Integer.MAX_VALUE;
+				}
+			}
+			if(rightDoc > leftDoc){
+				postings.add(new Integer(rightDoc));
+				rightPtr = rightPtr + 1;
+				if(rightPtr >= rightSize){
+					rightDoc = Integer.MAX_VALUE;
+				}
+			}
+		}
+		PostingList pl = new PostingList(termID,postings);
+		return pl;
 	}
 }

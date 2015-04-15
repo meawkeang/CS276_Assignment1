@@ -10,10 +10,10 @@ public class BasicIndex implements BaseIndex {
 
 	@Override
 	public PostingList readPosting(FileChannel fc) {
-		ByteBuffer termBuf = ByteBuffer.allocate(4);
-		ByteBuffer numPostingsBuf = ByteBuffer.allocate(4);
 		try{
 			if(fc.position() >= fc.size()) return null;
+			ByteBuffer termBuf = ByteBuffer.allocate(4);
+			ByteBuffer numPostingsBuf = ByteBuffer.allocate(4);
 			fc.read(termBuf);
 			fc.read(numPostingsBuf);
 			int termID = termBuf.getInt(0);

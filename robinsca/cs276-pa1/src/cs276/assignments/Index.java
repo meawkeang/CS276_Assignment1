@@ -50,23 +50,56 @@ public class Index {
 	 * */
 	private static void writePosting(FileChannel fc, PostingList posting)
 			throws IOException {
-		/*
-		 * Your code here
-		 */
+
+		//System.out.println(posting);
+		List<Integer> list = posting.getList();
+		Pair<Long,Integer> posFreq = new Pair<Long,Integer>(new Long(fc.position()), new Integer(list.size()));
+		postingDict.put(new Integer(posting.getTermId()),posFreq);
+		index.writePosting(fc,posting);
 	}
 
 	private static void merge(FileChannel fc1,FileChannel fc2,
-		FileChannel comb,BaseIndex index){
+		FileChannel comb) throws IOException{
 
+		//System.out.println("Merging...");
 		PostingList left = index.readPosting(fc1);
 		PostingList right = index.readPosting(fc2);
-		if(left.getTermId() == right.getTermId()){
-			PostingList combined = PostingList.combineLists(left,right);
+		while(true){
+			if(left == null && right == null){
+				//Both lists are finished, return
+				return;
+			}
+			if(left != null && right != null){
+				if(left.getTermId() == right.getTermId()){
+					//Equal terms, combine and advance both
+					PostingList combinedPosting = PostingList.combineLists(left,right);
+					writePosting(comb,combinedPosting);
+					left = index.readPosting(fc1);
+					right = index.readPosting(fc2);
+				}else{
+					//Advance the shorter term
+					if(left.getTermId() < right.getTermId()){
+						writePosting(comb,left);
+						left = index.readPosting(fc1);
+					}else{
+						writePosting(comb,right);
+						right = index.readPosting(fc2);
+					}
+				}
+			}else{
+				if(left == null){
+					//Left is null, advance the other posting
+					writePosting(comb,right);
+					right = index.readPosting(fc2);
+				}else{
+					//Right is null. advance the other posting
+					writePosting(comb,left);
+					left = index.readPosting(fc1);
+				}
+			}
+			//System.out.println(left);
+			//System.out.println(right);
 		}
-		
-
-		System.out.println(left);
-		System.out.println(right);
 	}
 
 	private static void mapper(ArrayList<Pair<Integer,Integer>> pairs, String term, int docID){
@@ -79,7 +112,7 @@ public class Index {
 	}
 
 	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs,
-		FileChannel fc, BaseIndex index){
+		FileChannel fc){
 		//System.out.println("Unsorted all pairs");
 		//System.out.println(pairs);
 		Collections.sort(pairs);
@@ -91,21 +124,21 @@ public class Index {
 		for(int i = 0; i < pairs.size(); i++){
 			if(i+1 == pairs.size()){
 				//We're finished with the list
-				createPosting(pairs,start,i,fc,index);
+				createPosting(pairs,start,i,fc);
 				return;
 			}
 			Pair<Integer,Integer> current = pairs.get(i);
 			Pair<Integer,Integer> next = pairs.get(i+1);
 			if(!((Integer)current.getFirst()).equals((Integer)next.getFirst())){
 				//We dont have a match
-				createPosting(pairs,start,i,fc,index);
+				createPosting(pairs,start,i,fc);
 				start = i+1;
 			}
 		}
 	}
 
 	private static void createPosting(ArrayList<Pair<Integer,Integer>> pairs,
-		int start,int end,FileChannel fc,BaseIndex index){
+		int start,int end,FileChannel fc){
 		//System.out.println("Posting");
 		//System.out.println(pairs.subList(start,end+1));
 		List<Pair<Integer,Integer>> pairPostings = pairs.subList(start,end+1);
@@ -121,8 +154,8 @@ public class Index {
 		}
 		int termID = (Integer)(pairPostings.get(0)).getFirst();
 		PostingList pl = new PostingList(termID,intPostings);
-		//System.out.println(pl);
 		index.writePosting(fc,pl);
+		//System.out.println(pl);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -214,7 +247,7 @@ public class Index {
 			 * writePosting above for sure.
 			 */
 			FileChannel fc = bfc.getChannel();
-			reducer(pairs,fc,index);
+			reducer(pairs,fc);
 			bfc.close();
 		}
 
@@ -242,7 +275,7 @@ public class Index {
 			 * This is where we merge all of the blocks with merge sort for
 			 * already sorted lists. We also track the freq of terms here
 			 */
-			merge(bf1.getChannel(),bf2.getChannel(),mf.getChannel(),index);
+			merge(bf1.getChannel(),bf2.getChannel(),mf.getChannel());
 			bf1.close();
 			bf2.close();
 			mf.close();

@@ -2,7 +2,6 @@ package cs276.util;
 
 import java.util.*;
 
-
 /**
  * A generic-typed pair of objects.
  * 

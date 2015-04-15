@@ -1,9 +1,9 @@
 
-0 seconds
-0 seconds
-1 seconds
-0 seconds
-0 seconds
-0 seconds
-1 seconds
-0 seconds
+4 seconds
+3 seconds
+4 seconds
+3 seconds
+9 seconds
+8 seconds
+10 seconds
+3 seconds

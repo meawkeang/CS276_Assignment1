@@ -37,11 +37,9 @@ public class BasicIndex implements BaseIndex {
 		List<Integer> postings = p.getList();
 		int numPostings = postings.size();
 		try{
-			ByteBuffer creds = ByteBuffer.allocate(2*4);
-			creds.putInt(termID);
-			creds.putInt(numPostings);
-			fc.write(ByteBuffer.wrap(creds.array()));
-			ByteBuffer bf = ByteBuffer.allocate(numPostings*4);
+			ByteBuffer bf = ByteBuffer.allocate(2*4 + numPostings*4);
+			bf.putInt(termID);
+			bf.putInt(numPostings);
 			for(int i = 0; i < numPostings; i++){
 				bf.putInt(postings.get(i));
 			}

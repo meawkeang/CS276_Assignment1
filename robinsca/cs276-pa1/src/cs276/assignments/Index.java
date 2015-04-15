@@ -55,6 +55,20 @@ public class Index {
 		 */
 	}
 
+	private static void merge(FileChannel fc1,FileChannel fc2,
+		FileChannel comb,BaseIndex index){
+
+		PostingList left = index.readPosting(fc1);
+		PostingList right = index.readPosting(fc2);
+		if(left.getTermId() == right.getTermId()){
+			PostingList combined = PostingList.combineLists(left,right);
+		}
+		
+
+		System.out.println(left);
+		System.out.println(right);
+	}
+
 	private static void mapper(ArrayList<Pair<Integer,Integer>> pairs, String term, int docID){
 		if(!termDict.containsKey(term)){
 			wordIdCounter = wordIdCounter + 1;
@@ -220,7 +234,6 @@ public class Index {
 				System.err.println("Create new block failure.");
 				return;
 			}
-
 			RandomAccessFile bf1 = new RandomAccessFile(b1, "r");
 			RandomAccessFile bf2 = new RandomAccessFile(b2, "r");
 			RandomAccessFile mf = new RandomAccessFile(combfile, "rw");
@@ -229,7 +242,7 @@ public class Index {
 			 * This is where we merge all of the blocks with merge sort for
 			 * already sorted lists. We also track the freq of terms here
 			 */
-			
+			merge(bf1.getChannel(),bf2.getChannel(),mf.getChannel(),index);
 			bf1.close();
 			bf2.close();
 			mf.close();

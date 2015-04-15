@@ -1,1 +1,7 @@
 6
+termID: 1 [1]
+termID: 1 [3]
+null
+termID: 3 [5]
+null
+null

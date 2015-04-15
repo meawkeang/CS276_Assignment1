@@ -30,4 +30,8 @@ public class PostingList {
 	public String toString() {
 		return "termID: " + this.termId + " " + this.postings;
 	}
+
+	public static PostingList combineLists(PostingList left, PostingList right){
+		return left;
+	}
 }

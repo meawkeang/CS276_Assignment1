@@ -10,6 +10,25 @@ public class BasicIndex implements BaseIndex {
 
 	@Override
 	public PostingList readPosting(FileChannel fc) {
+		ByteBuffer termBuf = ByteBuffer.allocate(4);
+		ByteBuffer numPostingsBuf = ByteBuffer.allocate(4);
+		try{
+			if(fc.position() >= fc.size()) return null;
+			fc.read(termBuf);
+			fc.read(numPostingsBuf);
+			int termID = termBuf.getInt(0);
+			int numPostings = numPostingsBuf.getInt(0);
+			ArrayList<Integer> postings = new ArrayList<Integer>(numPostings);
+			for(int i = 0; i < numPostings; i++){
+				ByteBuffer docID = ByteBuffer.allocate(4);
+				fc.read(docID);
+				postings.add(new Integer(docID.getInt(0)));
+			}
+			PostingList pl = new PostingList(termID,postings);
+			return pl;
+		}catch(/*IO*/Exception e){
+			e.printStackTrace();
+		}
 		return null;
 	}
 

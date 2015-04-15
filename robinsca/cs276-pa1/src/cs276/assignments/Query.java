@@ -64,16 +64,32 @@ public class Query {
 		for(int i = 1; i < ar.size(); i++){
 			List<Integer> nextList = readPosting(fc,(ar.get(i)).getTermId()).getList();
 			docList = intersectList(docList, nextList);
+			if(docList.size() == 0) break;
 		}
 		printDocList(docList);
 	}
 
 	private static List<Integer> intersectList(List<Integer> shorterList,
 		List<Integer> longerList){
-		/*ArrayList<Integer> finalList = new ArrayList<Integer>(shorterList.size());
-		finalList.add(new Integer(1));
-		return finalList;*/
-		return new ArrayList<Integer>(shorterList);
+		ArrayList<Integer> finalList = new ArrayList<Integer>(shorterList.size());
+		int leftPtr = 0;
+		int rightPtr = 0;
+		while(true){
+			if(leftPtr >= shorterList.size() || rightPtr >= longerList.size()){
+				return finalList;
+			}
+			if(shorterList.get(leftPtr).equals(longerList.get(rightPtr))){
+				finalList.add(new Integer(shorterList.get(leftPtr)));
+				leftPtr = leftPtr + 1;
+				rightPtr = rightPtr + 1;
+			}else{
+				if(shorterList.get(leftPtr).intValue() < longerList.get(rightPtr).intValue()){
+					leftPtr = leftPtr + 1;
+				}else{
+					rightPtr = rightPtr + 1;
+				}
+			}
+		}
 	}
 
 	private static void printDocList(List<Integer> docList){

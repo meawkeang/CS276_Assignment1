@@ -66,7 +66,11 @@ public class Query {
 		ar.remove(first);
 		for(Freq fr : ar){
 			List<Integer> nextList = readPosting(fc,fr.getTermId()).getList();
-			docList = intersectList(docList, nextList);
+			if(docList.size() <= nextList.size()){
+				docList = intersectList(docList, nextList);
+			}else{
+				docList = intersectList(nextList,docList);
+			}
 			if(docList.size() == 0) break;
 		}
 		printDocList(docList);

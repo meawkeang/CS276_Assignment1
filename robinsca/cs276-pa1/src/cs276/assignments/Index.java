@@ -55,6 +55,27 @@ public class Index {
 			pl = index.readPosting(fc);
 		}
 	}
+
+	private static File compressVB(File indexFile, File outputFile) throws IOException {
+		RandomAccessFile mf = new RandomAccessFile(indexFile, "r");
+		RandomAccessFile raOut = new RandomAccessFile(outputFile, "rw");
+		FileChannel fc = mf.getChannel();
+		FileChannel fcOut = raOut.getChannel();
+		BaseIndex vbIndex = new VBIndex();
+		while(true){
+			PostingList posting = index.readPosting(fc);
+			if(posting == null){
+				mf.close();
+				raOut.close();
+				indexFile.delete();
+				return outputFile;
+			}
+			List<Integer> list = posting.getList();
+			Pair<Long,Integer> posFreq = new Pair<Long,Integer>(new Long(fcOut.position()), new Integer(list.size()));
+			postingDict.put(new Integer(posting.getTermId()),posFreq);
+			vbIndex.writePosting(fcOut,posting);
+		}
+	}
 	
 	/* 
 	 * Write a posting list to the file 
@@ -200,7 +221,8 @@ public class Index {
 		}
 
 		/* Get index */
-		String className = "cs276.assignments." + args[0] + "Index";
+		//String className = "cs276.assignments." + args[0] + "Index";
+		String className = "cs276.assignments.BasicIndex";
 		try {
 			Class<?> indexClass = Class.forName(className);
 			index = (BaseIndex) indexClass.newInstance();
@@ -355,6 +377,9 @@ public class Index {
 		File indexFile = blockQueue.removeFirst();
 		if(sanity){
 			sanityCheck(indexFile);
+		}
+		if(args[0].equals("VB")){
+			indexFile = compressVB(indexFile,new File(output, "VBCompressionStep.index"));
 		}
 		indexFile.renameTo(new File(output, "corpus.index"));
 

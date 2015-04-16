@@ -1,0 +1,25 @@
+Task1
+
+73M
+96 seconds
+4 seconds
+2 seconds
+5 seconds
+2 seconds
+9 seconds
+7 seconds
+9 seconds
+3 seconds
+
+Task2
+
+37M
+114 seconds
+3 seconds
+2 seconds
+4 seconds
+3 seconds
+9 seconds
+9 seconds
+9 seconds
+2 seconds

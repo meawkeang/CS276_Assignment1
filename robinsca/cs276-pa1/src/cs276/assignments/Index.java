@@ -251,7 +251,7 @@ public class Index {
 			File[] filelist = blockDir.listFiles();
 			
 			int avgTokensPerDoc = 200;
-			int avgDocsPerBlock = 10000;
+			int avgDocsPerBlock = 500;
 			int avgPairs = avgTokensPerDoc*avgDocsPerBlock;
 			ArrayList<Pair<Integer,Integer>> pairs = new ArrayList<Pair<Integer,Integer>>(avgPairs);
 

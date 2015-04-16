@@ -58,10 +58,10 @@ public class Index {
 	 * You should record the file position of this posting list
 	 * so that you can read it back during retrieval
 	 * 
-	 * */
+	 * 
+	 */
 	private static void writePosting(FileChannel fc, PostingList posting)
 			throws IOException {
-
 		//System.out.println(posting);
 		List<Integer> list = posting.getList();
 		Pair<Long,Integer> posFreq = new Pair<Long,Integer>(new Long(fc.position()), new Integer(list.size()));
@@ -172,7 +172,8 @@ public class Index {
 	}
 
 	public static void main(String[] args) throws IOException {
-		boolean verbose = false;
+		/* Show timing or not */
+		boolean verbose = true;
 		/* Parse command line */
 		if (args.length != 3) {
 			System.err

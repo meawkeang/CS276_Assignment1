@@ -13,6 +13,8 @@ import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.List;
@@ -138,7 +140,7 @@ public class Index {
 		}
 	}
 
-	private static void mapper(ArrayList<Pair<Integer,Integer>> pairs, String term, int docID){
+	private static void mapper(TreeSet<Pair<Integer,Integer>> pairs, String term, int docID){
 		if(!termDict.containsKey(term)){
 			wordIdCounter = wordIdCounter + 1;
 			termDict.put(term,new Integer(wordIdCounter));
@@ -148,49 +150,39 @@ public class Index {
 		//System.out.println(pair);
 	}
 
-	private static void reducer(ArrayList<Pair<Integer,Integer>> pairs,
+	private static void reducer(TreeSet<Pair<Integer,Integer>> pairs,
 		FileChannel fc){
-		//System.out.println("Unsorted all pairs");
-		//System.out.println(pairs);
-		Collections.sort(pairs);
-		//System.out.println("Sorted all pairs");
-		//System.out.println(pairs);
-		int pairArSize = pairs.size();
-		if(pairArSize == 0) return;
-		//start and i are inclusive pointers
-		int start = 0;
-		for(int i = 0; i < pairArSize; i++){
-			if(i+1 == pairArSize){
-				//We're finished with the list
-				createPosting(pairs,start,i,fc);
-				return;
+		ArrayList<Pair<Integer,Integer>> equalTerms = new ArrayList<Pair<Integer,Integer>>();
+		for (Pair<Integer,Integer> pr : pairs) {
+			if(equalTerms.size() == 0){
+				equalTerms.add(pr);
+			}else{
+				Integer etTerm = (equalTerms.get(0)).getFirst();
+				Integer prTerm = pr.getFirst();
+				if(!etTerm.equals(prTerm)){
+					//Create a list
+					createPosting(equalTerms,fc);
+					equalTerms.clear();
+					equalTerms.add(pr);
+				}else{
+					//Continue the postings list
+					equalTerms.add(pr);
+				}
 			}
-			Pair<Integer,Integer> current = pairs.get(i);
-			Pair<Integer,Integer> next = pairs.get(i+1);
-			if(!((Integer)current.getFirst()).equals((Integer)next.getFirst())){
-				//We dont have a match
-				createPosting(pairs,start,i,fc);
-				start = i+1;
-			}
+		}
+		if(equalTerms.size() != 0){
+			//Create a list
+			createPosting(equalTerms,fc);
 		}
 	}
 
-	private static void createPosting(ArrayList<Pair<Integer,Integer>> pairs,
-		int start,int end,FileChannel fc){
-		//System.out.println("Posting");
-		//System.out.println(pairs.subList(start,end+1));
-		List<Pair<Integer,Integer>> pairPostings = pairs.subList(start,end+1);
-		ArrayList<Integer> intPostings = new ArrayList<Integer>(pairPostings.size());
-		//docIDs are all non-negative
-		Integer prevDoc = new Integer(-1);
-		for(int i = 0; i < pairPostings.size(); i++){
-			Integer doc = (Integer)(pairPostings.get(i)).getSecond();
-			if(!doc.equals(prevDoc)){
-				intPostings.add(doc);
-			}
-			prevDoc = doc;
+	private static void createPosting(ArrayList<Pair<Integer,Integer>> pairs,FileChannel fc){
+		ArrayList<Integer> intPostings = new ArrayList<Integer>(pairs.size());
+		for(int i = 0; i < pairs.size(); i++){
+			Integer doc = (Integer)(pairs.get(i)).getSecond();
+			intPostings.add(doc);
 		}
-		int termID = (Integer)(pairPostings.get(0)).getFirst();
+		int termID = (Integer)(pairs.get(0)).getFirst();
 		PostingList pl = new PostingList(termID,intPostings);
 		index.writePosting(fc,pl);
 		//System.out.println(pl);
@@ -198,7 +190,8 @@ public class Index {
 
 	public static void main(String[] args) throws IOException {
 		/* Show timing or not */
-		boolean verbose = false;
+		boolean verbose = false;//true;
+		boolean sanity = false;//true;
 		/* Parse command line */
 		if (args.length != 3) {
 			System.err
@@ -251,10 +244,12 @@ public class Index {
 			File blockDir = new File(root, block.getName());
 			File[] filelist = blockDir.listFiles();
 			
-			int avgTokensPerDoc = 100;
-			int avgDocsPerBlock = 500;
-			int avgPairs = avgTokensPerDoc*avgDocsPerBlock;
-			ArrayList<Pair<Integer,Integer>> pairs = new ArrayList<Pair<Integer,Integer>>(avgPairs);
+			//int avgTokensPerDoc = 100;
+			//int avgDocsPerBlock = 500;
+			//int avgPairs = avgTokensPerDoc*avgDocsPerBlock;
+			int avgUniquePerBlock = 700;
+			int avgPairs = avgUniquePerBlock;
+			TreeSet<Pair<Integer,Integer>> pairs = new TreeSet<Pair<Integer,Integer>>();
 
 			/* For each file */
 			long begin = System.currentTimeMillis();
@@ -358,7 +353,9 @@ public class Index {
 
 		/* Dump constructed index back into file system */
 		File indexFile = blockQueue.removeFirst();
-		//sanityCheck(indexFile);
+		if(sanity){
+			sanityCheck(indexFile);
+		}
 		indexFile.renameTo(new File(output, "corpus.index"));
 
 		BufferedWriter termWriter = new BufferedWriter(new FileWriter(new File(

@@ -69,45 +69,69 @@ public class Index {
 		index.writePosting(fc,posting);
 	}
 
-	private static void merge(FileChannel fc1,FileChannel fc2,
+	private static void merge(ArrayList<FileChannel> kFileChannels,
 		FileChannel comb) throws IOException{
 
+		//Read the first postings list from each FileChannel
+		int kSize = kFileChannels.size();
+		ArrayList<PostingList> kPostings = new ArrayList<PostingList>(kSize);
+		for(int i = 0; i < kSize; i++){
+			PostingList pl = index.readPosting(kFileChannels.get(i));
+			kPostings.add(pl);
+		}
+		ArrayList<Integer> shortestIds = new ArrayList<Integer>(kSize);
+		ArrayList<Pair<Integer,Integer>> validIds = new ArrayList<Pair<Integer,Integer>>(kSize);
 		//System.out.println("Merging...");
-		PostingList left = index.readPosting(fc1);
-		PostingList right = index.readPosting(fc2);
 		while(true){
-			//Both null, both lists are exhausted.
-			if(left == null && right == null){
-				return;
+			//All null, all lists are exhausted.
+			boolean done = true;
+			for(int i = 0; i < kSize; i++){
+				PostingList pl = kPostings.get(i);
+				if(pl != null){
+					done = false;
+					validIds.add(new Pair<Integer,Integer>(new Integer(pl.getTermId()),new Integer(i)));
+				}
 			}
+			if(done) return;
+			//Order the terms from least to greatest
+			Collections.sort(validIds);
+			//System.out.println(validIds);
 			//Take the shorter termID, if equal then combine
-			if(left != null && right != null){
-				if(left.getTermId() == right.getTermId()){
-					//Equal terms, combine and advance both
-					PostingList combinedPosting = PostingList.combineLists(left,right);
-					writePosting(comb,combinedPosting);
-					left = index.readPosting(fc1);
-					right = index.readPosting(fc2);
+			Pair<Integer,Integer> sh = validIds.get(0);
+			int shortestTerm = (Integer)sh.getFirst();
+			shortestIds.add((Integer)sh.getSecond());
+			int validSize = validIds.size();
+			for(int i = 1; i < validSize; i++){
+				Pair<Integer,Integer> next = validIds.get(i);
+				int nextTerm = (Integer)next.getFirst();
+				if(nextTerm == shortestTerm){
+					//The terms are equal, we're going to have to merge these
+					shortestIds.add((Integer)next.getSecond());
 				}else{
-					//Advance the shorter term
-					if(left.getTermId() < right.getTermId()){
-						writePosting(comb,left);
-						left = index.readPosting(fc1);
-					}else{
-						writePosting(comb,right);
-						right = index.readPosting(fc2);
-					}
-				}
-			}else{
-				//One of these postings is null, advance the nonnull pointer,
-				if(right != null){
-					writePosting(comb,right);
-					right = index.readPosting(fc2);
-				}else{
-					writePosting(comb,left);
-					left = index.readPosting(fc1);
+					break;
 				}
 			}
+			int shortSize = shortestIds.size();
+			if(shortSize == 1){
+				//No terms are equal, write and advance the shortest term
+				int shortId = shortestIds.get(0);
+				writePosting(comb,kPostings.get(shortId));
+				PostingList advance = index.readPosting(kFileChannels.get(shortId));
+				kPostings.set(shortId,advance);
+			}else{
+				//Multiple terms are equal, we need to merge them
+				ArrayList<PostingList> shortList = new ArrayList<PostingList>(shortSize);
+				for(int i = 0; i < shortSize; i++){
+					int shortestIndex = shortestIds.get(i);
+					shortList.add(kPostings.get(shortestIndex));
+					PostingList advance = index.readPosting(kFileChannels.get(shortestIndex));
+					kPostings.set(shortestIndex,advance);
+				}
+				PostingList combinedPosting = PostingList.combineMultipleLists(shortList);
+				writePosting(comb,combinedPosting);
+			}
+			shortestIds.clear();
+			validIds.clear();
 			//System.out.println(left);
 			//System.out.println(right);
 		}
@@ -173,7 +197,7 @@ public class Index {
 
 	public static void main(String[] args) throws IOException {
 		/* Show timing or not */
-		boolean verbose = true;
+		boolean verbose = false;
 		/* Parse command line */
 		if (args.length != 3) {
 			System.err
@@ -288,7 +312,7 @@ public class Index {
 		while (true) {
 			if (blockQueue.size() <= 1)
 				break;
-
+			
 			File b1 = blockQueue.removeFirst();
 			File b2 = blockQueue.removeFirst();
 			
@@ -305,7 +329,10 @@ public class Index {
 			 * This is where we merge all of the blocks with merge sort for
 			 * already sorted lists. We also track the freq of terms here
 			 */
-			merge(bf1.getChannel(),bf2.getChannel(),mf.getChannel());
+			ArrayList<FileChannel> kInputs = new ArrayList<FileChannel>(2);
+			kInputs.add(bf1.getChannel());
+			kInputs.add(bf2.getChannel());
+			merge(kInputs,mf.getChannel());
 			bf1.close();
 			bf2.close();
 			mf.close();

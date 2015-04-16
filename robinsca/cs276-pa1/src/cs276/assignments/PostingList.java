@@ -81,4 +81,15 @@ public class PostingList {
 		}
 	}
 
+	public static PostingList combineMultipleLists(ArrayList<PostingList> pl){
+		//System.out.println(pl);
+		if(pl == null || pl.size() == 0) return null;
+		while(pl.size() > 1){
+			PostingList list1 = pl.remove(0);
+			PostingList list2 = pl.remove(0);
+			pl.add(combineLists(list1,list2));
+		}
+		return pl.get(0);
+	}
+
 }

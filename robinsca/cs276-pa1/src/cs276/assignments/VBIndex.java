@@ -29,7 +29,6 @@ public class VBIndex implements BaseIndex {
 
 	@Override
 	public void writePosting(FileChannel fc, PostingList p) {
-		//System.out.println(p);
 		Integer termID = p.getTermId();
 		List<Integer> postings = p.getList();
 		ArrayList<Byte> byteList = vbEncodeStream(postings);
@@ -53,13 +52,13 @@ public class VBIndex implements BaseIndex {
 		int prevNumber = 0;
 		for(int i = 0; i < numBytes; i++){
 			byte b = byteArray[i];
-			if(b < 128){
-				number = number*128 + b;
-			}else{
-				number = number*128 + (b - 128) + prevNumber;
+			if(b < 0){
+				number = number*128 + prevNumber + (b+128);
 				postings.add(new Integer(number));
 				prevNumber = number;
 				number = 0;
+			}else{
+				number = number*128 + b;
 			}
 		}
 		return postings;

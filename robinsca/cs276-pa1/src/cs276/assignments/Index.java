@@ -172,6 +172,7 @@ public class Index {
 	}
 
 	public static void main(String[] args) throws IOException {
+		boolean verbose = false;
 		/* Parse command line */
 		if (args.length != 3) {
 			System.err
@@ -230,6 +231,7 @@ public class Index {
 			ArrayList<Pair<Integer,Integer>> pairs = new ArrayList<Pair<Integer,Integer>>(avgPairs);
 
 			/* For each file */
+			long begin = System.currentTimeMillis();
 			for (File file : filelist) {
 				++totalFileCount;
 				String fileName = block.getName() + "/" + file.getName();
@@ -250,6 +252,10 @@ public class Index {
 				}
 				reader.close();
 			}
+			long end = System.currentTimeMillis();
+			if(verbose){
+				System.out.println("Mapper phase took " + ((end - begin)/1000) + " seconds");
+			}
 
 			/* Sort and output */
 			if (!blockFile.createNewFile()) {
@@ -264,7 +270,12 @@ public class Index {
 			 * writePosting above for sure.
 			 */
 			FileChannel fc = bfc.getChannel();
+			begin = System.currentTimeMillis();
 			reducer(pairs,fc);
+			end = System.currentTimeMillis();
+			if(verbose){
+				System.out.println("Reducer phase took " + ((end - begin)/1000) + " seconds");
+			}
 			bfc.close();
 		}
 
@@ -272,6 +283,7 @@ public class Index {
 		System.out.println(totalFileCount);
 
 		/* Merge blocks */
+		long begin = System.currentTimeMillis();
 		while (true) {
 			if (blockQueue.size() <= 1)
 				break;
@@ -299,6 +311,10 @@ public class Index {
 			b1.delete();
 			b2.delete();
 			blockQueue.add(combfile);
+		}
+		long end = System.currentTimeMillis();
+		if(verbose){
+			System.out.println("Merge phase took " + ((end - begin)/1000) + " seconds");
 		}
 
 		/* Dump constructed index back into file system */

@@ -4,6 +4,6 @@
 4 seconds
 2 seconds
 10 seconds
+8 seconds
 9 seconds
-9 seconds
-3 seconds
+2 seconds

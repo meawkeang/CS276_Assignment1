@@ -10,6 +10,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class Query {
 
 	private static void answer(String query, FileChannel fc) throws IOException {
 		String[] tokens = query.trim().split("\\s+");
-		ArrayList<Freq> ar = new ArrayList<Freq>(tokens.length);
+		TreeSet<Freq> ar = new TreeSet<Freq>();
 		for(int i = 0; i < tokens.length; i++){
 			if(!termDict.containsKey(tokens[i])){
 				//Posting list of 0, automatically no returned docs
@@ -55,15 +56,16 @@ public class Query {
 			int freq = freqDict.get(termID);
 			ar.add(new Freq(new Integer(termID),new Integer(freq)));
 		}
-		Collections.sort(ar);
 		//System.out.println(ar);
 		processQuery(ar,fc);
 	}
 
-	private static void processQuery(ArrayList<Freq> ar, FileChannel fc) throws IOException {
-		List<Integer> docList = readPosting(fc,(ar.get(0)).getTermId()).getList();
-		for(int i = 1; i < ar.size(); i++){
-			List<Integer> nextList = readPosting(fc,(ar.get(i)).getTermId()).getList();
+	private static void processQuery(TreeSet<Freq> ar, FileChannel fc) throws IOException {
+		Freq first = ar.first();
+		List<Integer> docList = readPosting(fc,(first.getTermId())).getList();
+		ar.remove(first);
+		for(Freq fr : ar){
+			List<Integer> nextList = readPosting(fc,fr.getTermId()).getList();
 			docList = intersectList(docList, nextList);
 			if(docList.size() == 0) break;
 		}
@@ -98,14 +100,12 @@ public class Query {
 			System.out.println("no results found");
 			return;
 		}
-		ArrayList<String> list = new ArrayList<String>(docList.size());
+		TreeSet<String> list = new TreeSet<String>();
 		for(int i = 0; i < docList.size(); i++){
 			list.add(docDict.get(docList.get(i)));
 		}
-		//System.out.println(list);
-		Collections.sort(list);
-		for(int i = 0; i < list.size(); i++){
-			System.out.println(list.get(i));
+		for(String doc : list){
+			System.out.println(doc);
 		}
 	}
 

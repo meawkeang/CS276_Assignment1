@@ -10,6 +10,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import cs276.util.Freq;
@@ -17,13 +18,13 @@ import cs276.util.Freq;
 public class Query {
 
 	// Term id -> position in index file
-	private static Map<Integer, Long> posDict = new TreeMap<Integer, Long>();
+	private static Map<Integer, Long> posDict = new HashMap<Integer, Long>();
 	// Term id -> document frequency
-	private static Map<Integer, Integer> freqDict = new TreeMap<Integer, Integer>();
+	private static Map<Integer, Integer> freqDict = new HashMap<Integer, Integer>();
 	// Doc id -> doc name dictionary
-	private static Map<Integer, String> docDict = new TreeMap<Integer, String>();
+	private static Map<Integer, String> docDict = new HashMap<Integer, String>();
 	// Term -> term id dictionary
-	private static Map<String, Integer> termDict = new TreeMap<String, Integer>();
+	private static Map<String, Integer> termDict = new HashMap<String, Integer>();
 	// Index
 	private static BaseIndex index = null;
 

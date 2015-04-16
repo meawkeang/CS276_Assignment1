@@ -16,23 +16,10 @@ public class VBIndex implements BaseIndex {
 			fc.read(creds);
 			int termID = creds.getInt(0);
 			int numBytes = creds.getInt(4);
-			ArrayList<Integer> postings = new ArrayList<Integer>();
 			ByteBuffer docs = ByteBuffer.allocate(numBytes);
 			fc.read(docs);
-			byte[] byteArray = docs.array();
-			int number = 0;
-			for(int i = 0; i < numBytes; i++){
-				byte b = byteArray[i];
-				if(b < 128){
-					number = number*128 + b;
-				}else{
-					number = number*128 + b - 128;
-					postings.add(new Integer(number));
-					number = 0;
-				}
-			}
+			ArrayList<Integer> postings = vbDecodeStream(numBytes,docs);
 			PostingList pl = new PostingList(termID,postings);
-			//System.out.println(pl);
 			return pl;
 		}catch(IOException e){
 			e.printStackTrace();
@@ -57,6 +44,25 @@ public class VBIndex implements BaseIndex {
 		}catch(IOException e){
 			e.printStackTrace();
 		}
+	}
+
+	private ArrayList<Integer> vbDecodeStream(int numBytes, ByteBuffer docs){
+		ArrayList<Integer> postings = new ArrayList<Integer>();
+		byte[] byteArray = docs.array();
+		int number = 0;
+		int prevNumber = 0;
+		for(int i = 0; i < numBytes; i++){
+			byte b = byteArray[i];
+			if(b < 128){
+				number = number*128 + b;
+			}else{
+				number = number*128 + (b - 128) + prevNumber;
+				postings.add(new Integer(number));
+				prevNumber = number;
+				number = 0;
+			}
+		}
+		return postings;
 	}
 
 	private ArrayList<Byte> vbEncodeStream(List<Integer> docIds){

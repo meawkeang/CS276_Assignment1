@@ -312,32 +312,42 @@ public class Index {
 		while (true) {
 			if (blockQueue.size() <= 1)
 				break;
-			
-			File b1 = blockQueue.removeFirst();
-			File b2 = blockQueue.removeFirst();
-			
-			File combfile = new File(output, b1.getName() + "+" + b2.getName());
+			int size = blockQueue.size();
+			ArrayList<File> fileList = new ArrayList<File>(size);
+			String combName = "";
+			for(int i = 0; i < size; i++){
+				File fl = blockQueue.removeFirst();
+				fileList.add(fl);
+				if(i != size - 1){
+					combName = combName + fl.getName() + "+";
+				}else{
+					combName = combName + fl.getName();
+				}
+			}
+			File combfile = new File(output,combName);
 			if (!combfile.createNewFile()) {
 				System.err.println("Create new block failure.");
 				return;
 			}
-			RandomAccessFile bf1 = new RandomAccessFile(b1, "r");
-			RandomAccessFile bf2 = new RandomAccessFile(b2, "r");
+			ArrayList<RandomAccessFile> raList = new ArrayList<RandomAccessFile>(size);
+			ArrayList<FileChannel> kInputs = new ArrayList<FileChannel>(size);
+			for(int i = 0; i < size; i++){
+				RandomAccessFile ra = new RandomAccessFile(fileList.get(i),"r");
+				raList.add(ra);
+				kInputs.add(ra.getChannel());
+			}
 			RandomAccessFile mf = new RandomAccessFile(combfile, "rw");
 			 
 			/* My code here
 			 * This is where we merge all of the blocks with merge sort for
 			 * already sorted lists. We also track the freq of terms here
 			 */
-			ArrayList<FileChannel> kInputs = new ArrayList<FileChannel>(2);
-			kInputs.add(bf1.getChannel());
-			kInputs.add(bf2.getChannel());
 			merge(kInputs,mf.getChannel());
-			bf1.close();
-			bf2.close();
+			for(int i = 0; i < size; i++){
+				(raList.get(i)).close();
+				(fileList.get(i)).delete();
+			}
 			mf.close();
-			b1.delete();
-			b2.delete();
 			blockQueue.add(combfile);
 		}
 		long end = System.currentTimeMillis();

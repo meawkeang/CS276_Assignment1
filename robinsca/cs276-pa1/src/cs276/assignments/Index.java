@@ -12,6 +12,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +22,13 @@ public class Index {
 
 	// Term id -> (position in index file, doc frequency) dictionary
 	private static Map<Integer, Pair<Long, Integer>> postingDict 
-		= new TreeMap<Integer, Pair<Long, Integer>>();
+		= new HashMap<Integer, Pair<Long, Integer>>();
 	// Doc name -> doc id dictionary
 	private static Map<String, Integer> docDict
-		= new TreeMap<String, Integer>();
+		= new HashMap<String, Integer>();
 	// Term -> term id dictionary
 	private static Map<String, Integer> termDict
-		= new TreeMap<String, Integer>();
+		= new HashMap<String, Integer>();
 	// Block queue
 	private static LinkedList<File> blockQueue
 		= new LinkedList<File>();
